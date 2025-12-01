@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.log
+./hms-backend/generate
+./hms-backend/generate-ddd-structure.sh
+./hms-backend/generate-ddd-with-boilerplate.sh
+

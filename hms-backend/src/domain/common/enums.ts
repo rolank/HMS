@@ -1,0 +1,83 @@
+export enum AccountStatus {
+  ACTIVE="ACTIVE",
+  LOCKED="LOCKED",
+  DISABLED="DISABLED"
+}
+
+export enum AppointmentStatus {
+  SCHEDULED="SCHEDULED",
+  COMPLETED="COMPLETED",
+  CANCELLED="CANCELLED",
+  NO_SHOW="NO_SHOW"
+}
+
+export enum BookingChannel {
+  PHONE="PHONE",
+  FRONT_DESK="FRONT_DESK",
+  PATIENT_PORTAL="PATIENT_PORTAL",
+  REFERRAL_API="REFERRAL_API"
+}
+
+export enum BookedByRole {
+  PATIENT="PATIENT",
+  EMPLOYEE="EMPLOYEE"
+}
+
+export enum CheckInChannel {
+  KIOSK="KIOSK",
+  FRONT_DESK="FRONT_DESK",
+  MOBILE_APP="MOBILE_APP"
+}
+
+export enum EncounterStatus {
+  PLANNED="PLANNED",
+  ACTIVE="ACTIVE",
+  COMPLETED="COMPLETED",
+  CANCELLED="CANCELLED"
+}
+
+export enum RecordStatus {
+  DRAFT="DRAFT",
+  SIGNED="SIGNED",
+  AMENDED="AMENDED"
+}
+
+export enum VitalType {
+  HEART_RATE="HEART_RATE",
+  BLOOD_PRESSURE="BLOOD_PRESSURE",
+  TEMPERATURE="TEMPERATURE",
+  RESPIRATORY_RATE="RESPIRATORY_RATE",
+  SPO2="SPO2"
+}
+
+export enum DiagnosisType {
+  PRIMARY="PRIMARY",
+  SECONDARY="SECONDARY",
+  RULE_OUT="RULE_OUT"
+}
+
+export enum OrderType {
+  LAB="LAB",
+  IMAGING="IMAGING",
+  PROCEDURE="PROCEDURE",
+  REFERRAL="REFERRAL"
+}
+
+export enum OrderStatus {
+  ORDERED="ORDERED",
+  IN_PROGRESS="IN_PROGRESS",
+  COMPLETED="COMPLETED",
+  CANCELLED="CANCELLED"
+}
+
+export enum NotificationTopic {
+  APPOINTMENT_CHECKED_IN="APPOINTMENT_CHECKED_IN",
+  APPOINTMENT_REMINDER="APPOINTMENT_REMINDER",
+  LAB_RESULT_READY="LAB_RESULT_READY"
+}
+
+export enum NotificationChannel {
+  EMAIL="EMAIL",
+  SMS="SMS",
+  PUSH="PUSH"
+}

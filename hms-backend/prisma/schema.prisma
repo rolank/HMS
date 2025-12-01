@@ -1,0 +1,402 @@
+// ======================================================
+// GENERATOR + DATASOURCE
+// ======================================================
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"  // or postgresql if preferred
+  url      = env("DATABASE_URL")
+}
+
+// ======================================================
+// ENUMS
+// ======================================================
+enum AccountStatus {
+  ACTIVE
+  LOCKED
+  DISABLED
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum BookingChannel {
+  PHONE
+  FRONT_DESK
+  PATIENT_PORTAL
+  REFERRAL_API
+}
+
+enum BookedByRole {
+  PATIENT
+  EMPLOYEE
+}
+
+enum CheckInChannel {
+  KIOSK
+  FRONT_DESK
+  MOBILE_APP
+}
+
+enum EncounterStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum RecordStatus {
+  DRAFT
+  SIGNED
+  AMENDED
+}
+
+enum VitalType {
+  HEART_RATE
+  BLOOD_PRESSURE
+  TEMPERATURE
+  RESPIRATORY_RATE
+  SPO2
+}
+
+enum DiagnosisType {
+  PRIMARY
+  SECONDARY
+  RULE_OUT
+}
+
+enum OrderType {
+  LAB
+  IMAGING
+  PROCEDURE
+  REFERRAL
+}
+
+enum OrderStatus {
+  ORDERED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationTopic {
+  APPOINTMENT_CHECKED_IN
+  APPOINTMENT_REMINDER
+  LAB_RESULT_READY
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+}
+
+model NotificationPreferenceChannel {
+  id                      String              @id @default(uuid())
+  channel                 NotificationChannel
+
+  notificationPreferenceId String
+  notificationPreference   NotificationPreference @relation(fields: [notificationPreferenceId], references: [id])
+
+  @@index([notificationPreferenceId])
+}
+
+
+
+// ======================================================
+// PERSON (base entity)
+// ======================================================
+model Person {
+  id                String              @id @default(uuid())
+  firstName         String
+  lastName          String
+  dob               DateTime
+  gender            String
+  address           String
+  phone             String
+
+  emergencyContacts EmergencyContact[]
+
+  // Relationships
+  patient           Patient?
+  employee          Employee?
+  userAccount       UserAccount?
+  appointmentsBooked Appointment[]      @relation("BookedByPerson")
+}
+
+// Value Object (stored as table)
+model EmergencyContact {
+  id        String   @id @default(uuid())
+  name      String
+  relation  String
+  phone     String
+
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id])
+}
+
+// ======================================================
+// EMPLOYEE → DOCTOR specialization
+// ======================================================
+model Employee {
+  id          String   @id @default(uuid())
+  employeeId  String   @unique
+  department  String
+  salary      Float
+  email       String
+
+  personId    String   @unique
+  person      Person   @relation(fields: [personId], references: [id])
+
+  doctor      Doctor?
+}
+
+model Doctor {
+  id            String     @id @default(uuid())
+  specialty     String
+  licenseNo     String     @unique
+  qualification String
+
+  employeeId    String     @unique
+  employee      Employee   @relation(fields: [employeeId], references: [id])
+
+  appointments  Appointment[]
+  encounters    Encounter[]
+  medicalRecords MedicalRecord[]
+}
+
+// ======================================================
+// PATIENT
+// ======================================================
+model Patient {
+  id                   String         @id @default(uuid())
+  patientId            String         @unique
+  medicalRecordNumber  String         @unique
+  bloodType            String
+  insuranceProvider    String
+
+  personId             String         @unique
+  person               Person         @relation(fields: [personId], references: [id])
+
+  appointments         Appointment[]
+  encounters           Encounter[]
+  medicalRecords       MedicalRecord[]
+}
+
+// ======================================================
+// USER ACCOUNT
+// ======================================================
+model UserAccount {
+  id              String         @id @default(uuid())
+  username        String         @unique
+  passwordHash    String
+  status          AccountStatus
+  lastLoginAt     DateTime?
+
+  ownerId         String @unique
+  owner           Person         @relation(fields: [ownerId], references: [id])
+
+  createdAppointments Appointment[] @relation("CreatedByUser")
+  checkedInAppointments Appointment[] @relation("CheckedInByUser")
+
+  encountersStarted Encounter[] @relation("EncounterStartedBy")
+  encountersEnded   Encounter[] @relation("EncounterEndedBy")
+
+  medicalRecordsCreated MedicalRecord[] @relation("MedicalRecordCreatedBy")
+  medicalRecordsSigned  MedicalRecord[] @relation("MedicalRecordSignedBy")
+
+  notificationPreferences NotificationPreference[]
+}
+
+// ======================================================
+// APPOINTMENT
+// ======================================================
+model Appointment {
+  id           String            @id @default(uuid())
+  appointmentDate DateTime
+  reason       String
+  status       AppointmentStatus
+  channel      BookingChannel
+  createdAt    DateTime          @default(now())
+  checkInNotes String?
+
+  doctorId     String
+  doctor       Doctor            @relation(fields: [doctorId], references: [id])
+
+  patientId    String
+  patient      Patient           @relation(fields: [patientId], references: [id])
+
+  bookedById   String
+  bookedBy     Person            @relation("BookedByPerson", fields: [bookedById], references: [id])
+
+  bookedByRole BookedByRole
+
+  createdById  String
+  createdBy    UserAccount       @relation("CreatedByUser", fields: [createdById], references: [id])
+
+  checkedInById String?
+  checkedInBy   UserAccount?     @relation("CheckedInByUser", fields: [checkedInById], references: [id])
+
+  checkInChannel CheckInChannel?
+
+  encounter    Encounter?
+}
+
+// ======================================================
+// ENCOUNTER (links appointment → encounter)
+// ======================================================
+model Encounter {
+  id           String        @id @default(uuid())
+  startedAt    DateTime?
+  endedAt      DateTime?
+  status       EncounterStatus @default(PLANNED)
+
+  appointmentId String @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+
+  patientId     String
+  patient       Patient    @relation(fields: [patientId], references: [id])
+
+  doctorId      String
+  doctor        Doctor     @relation(fields: [doctorId], references: [id])
+
+  startedById   String?
+  startedBy     UserAccount? @relation("EncounterStartedBy", fields: [startedById], references: [id])
+
+  endedById     String?
+  endedBy       UserAccount? @relation("EncounterEndedBy", fields: [endedById], references: [id])
+
+  medicalRecord MedicalRecord?
+}
+
+// ======================================================
+// MEDICAL RECORD (aggregate root)
+// ======================================================
+model MedicalRecord {
+  id                   String     @id @default(uuid())
+  createdAt            DateTime   @default(now())
+  signedAt             DateTime?
+  status               RecordStatus
+
+  chiefComplaint       String?
+  historyOfPresentIllness String?
+  reviewOfSystems      String?
+  physicalExam         String?
+  assessment           String?
+  plan                 String?
+
+  encounterId          String @unique
+  encounter            Encounter @relation(fields: [encounterId], references: [id])
+
+  patientId            String
+  patient              Patient  @relation(fields: [patientId], references: [id])
+
+  doctorId             String
+  authoringDoctor      Doctor   @relation(fields: [doctorId], references: [id])
+
+  createdById          String
+  createdBy            UserAccount @relation("MedicalRecordCreatedBy", fields: [createdById], references: [id])
+
+  signedById           String?
+  signedBy             UserAccount? @relation("MedicalRecordSignedBy", fields: [signedById], references: [id])
+
+  vitals               VitalSign[]
+  observations         Observation[]
+  diagnoses            Diagnosis[]
+  orders               Order[]
+  medicationOrders     MedicationOrder[]
+}
+
+// ======================================================
+// VITAL SIGNS
+// ======================================================
+model VitalSign {
+  id            String    @id @default(uuid())
+  type          VitalType
+  value         String
+  unit          String
+  measuredAt    DateTime
+
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+// ======================================================
+// OBSERVATIONS
+// ======================================================
+model Observation {
+  id            String    @id @default(uuid())
+  code          String
+  description   String
+  value         String?
+  unit          String?
+  observedAt    DateTime
+
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+// ======================================================
+// DIAGNOSES
+// ======================================================
+model Diagnosis {
+  id            String        @id @default(uuid())
+  code          String
+  description   String
+  type          DiagnosisType
+
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+// ======================================================
+// ORDERS
+// ======================================================
+model Order {
+  id            String       @id @default(uuid())
+  type          OrderType
+  details       String?
+  status        OrderStatus
+  orderedAt     DateTime
+
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+// ======================================================
+// MEDICATION ORDERS
+// ======================================================
+model MedicationOrder {
+  id            String     @id @default(uuid())
+  medication    String
+  dosage        String
+  route         String
+  frequency     String
+  days          Int
+  orderedAt     DateTime
+
+  medicalRecordId String
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+// ======================================================
+// NOTIFICATION PREFERENCES
+// ======================================================
+model NotificationPreference {
+  id                 String              @id @default(uuid())
+  topic              NotificationTopic
+  enabled            Boolean             @default(true)
+  quietStart         String?
+  quietEnd           String?
+
+  userAccountId      String
+  userAccount        UserAccount         @relation(fields: [userAccountId], references: [id])
+
+  channels           NotificationPreferenceChannel[]
+}

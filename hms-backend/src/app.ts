@@ -1,0 +1,14 @@
+import express from "express";
+import routes from "./interfaces/http/routes";
+import { errorHandler } from "./interfaces/middleware/errorHandler";
+import { notFound } from "./interfaces/middleware/notFound";
+
+const app = express();
+app.use(express.json());
+
+app.use("/api/v1", routes);
+
+app.use(notFound);
+app.use(errorHandler);
+
+export default app;
