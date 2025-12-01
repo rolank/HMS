@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { BookAppointmentUseCase } from "../../../application/usecases/appointments/BookAppointmentUseCase";
 import { ListAppointmentsUseCase } from "../../../application/usecases/appointments/ListAppointmentsUseCase";
 import { CheckInAppointmentUseCase } from "../../../application/usecases/appointments/CheckInAppointmentUseCase";
-import prisma from "../../../infrastructure/config/prisma";
 
 export class AppointmentController {
   constructor(
@@ -21,8 +20,12 @@ export class AppointmentController {
   }
 
   async list(req: Request, res: Response) {
-    const data = await this.listUC.execute();
-    res.json(data);
+    try {
+      const appointments = await this.listUC.execute();
+      res.json({ success: true, appointments });
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
   }
 
   async checkIn(req: Request, res: Response) {
@@ -38,3 +41,4 @@ export class AppointmentController {
     }
   }
 }
+
