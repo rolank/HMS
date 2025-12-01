@@ -1,0 +1,26 @@
+import { PrismaAppointmentRepository } from "../../../infrastructure/prisma/PrismaAppointmentRepository";
+import { BookAppointmentUseCase } from "../../../application/usecases/appointments/BookAppointmentUseCase";
+import { ListAppointmentsUseCase } from "../../../application/usecases/appointments/ListAppointmentsUseCase";
+import { CheckInAppointmentUseCase } from "../../../application/usecases/appointments/CheckInAppointmentUseCase";
+
+import { EventBus } from "../../../domain/events/EventBus";
+import { AppointmentController } from "../controllers/AppointmentController";
+
+export class AppointmentControllerFactory {
+  static create() {
+    // Repository
+    const repo = new PrismaAppointmentRepository();
+
+    // Event system
+    const eventBus = new EventBus();
+
+    // Use cases
+    const bookUC = new BookAppointmentUseCase(repo);
+    const listUC = new ListAppointmentsUseCase(repo);
+    const checkInUC = new CheckInAppointmentUseCase(repo, eventBus);
+
+    // Controller
+    return new AppointmentController(bookUC, listUC, checkInUC);
+  }
+}
+

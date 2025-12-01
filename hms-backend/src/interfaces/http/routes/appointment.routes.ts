@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AppointmentControllerFactory } from "../../factories/AppointmentControllerFactory";
+import { AppointmentControllerFactory } from "../../../interfaces/http/factories/AppointmentControllerFactory"
 
 const router = Router();
 const controller = AppointmentControllerFactory.create();
