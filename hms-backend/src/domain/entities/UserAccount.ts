@@ -3,7 +3,7 @@ import { AccountStatus } from "../common/enums";
 import { Person } from "./Person";
 
 export class UserAccount {
-  private userId: UUID;
+  private id: UUID;
   private username: string;
   private passwordHash: string;
   private status: AccountStatus;
@@ -11,14 +11,14 @@ export class UserAccount {
   private owner: Person;
 
   constructor(
-    userId: UUID,
+    id: UUID,
     username: string,
     passwordHash: string,
     status: AccountStatus,
     owner: Person,
     lastLoginAt: Date | null = null
   ) {
-    this.userId = userId;
+    this.id = id;
     this.username = username;
     this.passwordHash = passwordHash;
     this.status = status;
@@ -26,7 +26,7 @@ export class UserAccount {
     this.lastLoginAt = lastLoginAt;
   }
 
-  getUserId(): UUID { return this.userId; }
+  getId(): UUID { return this.id; }
   getUsername(): string { return this.username; }
   setUsername(v: string): void { this.username = v; }
 
@@ -42,3 +42,4 @@ export class UserAccount {
   getOwner(): Person { return this.owner; }
   setOwner(v: Person): void { this.owner = v; }
 }
+
