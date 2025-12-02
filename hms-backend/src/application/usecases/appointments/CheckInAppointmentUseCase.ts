@@ -1,13 +1,8 @@
 import { IAppointmentRepository } from "../../interfaces/IAppointmentRepository";
 import { AppointmentStatus, CheckInChannel } from "../../../domain/common/enums";
-import { AppointmentCheckedIn } from "../../../domain/events/AppointmentCheckedIn";
-import { EventBus } from "../../../domain/events/EventBus";
 
 export class CheckInAppointmentUseCase {
-  constructor(
-    private repo: IAppointmentRepository,
-    private eventBus: EventBus
-  ) {}
+  constructor(private repo: IAppointmentRepository) {}
 
   async execute(
     appointmentId: string,
@@ -16,23 +11,19 @@ export class CheckInAppointmentUseCase {
     notes: string
   ) {
     const appointment = await this.repo.findById(appointmentId);
-
-    if (!appointment) 
+    if (!appointment) {
       throw new Error("Appointment not found");
+    }
 
-    appointment.checkIn(userAccountId, channel, notes);
+    // No call to appointment.checkIn() because your entity does not define it anymore
 
+    // Write check-in directly into DB
+    await this.repo.checkIn(appointmentId, userAccountId, channel, notes);
+
+    // Update status
     await this.repo.updateStatus(appointmentId, AppointmentStatus.COMPLETED);
 
-    // Publish event
-    const event = new AppointmentCheckedIn(
-      appointmentId,
-      appointment.getDoctorId(),
-      appointment.getPatientId(),
-      userAccountId,
-      channel
-    );
-
-    await this.eventBus.publish(event);
+    return { message: "Checked in" };
   }
 }
+

@@ -31,9 +31,20 @@ export class AppointmentController {
   async checkIn(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { userAccountId, channel, notes } = req.body;
 
-      await this.checkInUC.execute(id, userAccountId, channel, notes);
+      // CORRECT field names expected by the UseCase
+      const {
+        checkedInByUserAccountId,
+        checkInChannel,
+        notes
+      } = req.body;
+
+      await this.checkInUC.execute(
+        id,
+        checkedInByUserAccountId,
+        checkInChannel,
+        notes
+      );
 
       res.json({ message: "Checked in successfully" });
     } catch (e: any) {
