@@ -3,7 +3,6 @@ import { BookAppointmentUseCase } from "../../../application/usecases/appointmen
 import { ListAppointmentsUseCase } from "../../../application/usecases/appointments/ListAppointmentsUseCase";
 import { CheckInAppointmentUseCase } from "../../../application/usecases/appointments/CheckInAppointmentUseCase";
 
-import { EventBus } from "../../../domain/events/EventBus";
 import { AppointmentController } from "../controllers/AppointmentController";
 
 export class AppointmentControllerFactory {
@@ -11,16 +10,12 @@ export class AppointmentControllerFactory {
     // Repository
     const repo = new PrismaAppointmentRepository();
 
-    // Event system
-    const eventBus = new EventBus();
-
     // Use cases
     const bookUC = new BookAppointmentUseCase(repo);
     const listUC = new ListAppointmentsUseCase(repo);
-    const checkInUC = new CheckInAppointmentUseCase(repo, eventBus);
+    const checkInUC = new CheckInAppointmentUseCase(repo);
 
     // Controller
     return new AppointmentController(bookUC, listUC, checkInUC);
   }
 }
-

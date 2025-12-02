@@ -2,7 +2,7 @@ import { IPatientRepository } from "../../interfaces/IPatientRepository";
 import { Patient } from "../../../domain/entities/Patient";
 import { Person } from "../../../domain/entities/Person";
 import { EmergencyContact } from "../../../domain/value-objects/EmergencyContact";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 
 interface Command {
   firstName: string;
@@ -23,7 +23,7 @@ export class CreatePatientUseCase {
 
   async execute(cmd: Command) {
     const person = new Person(
-      uuid(),
+      randomUUID(),
       cmd.firstName,
       cmd.lastName,
       new Date(cmd.dob),

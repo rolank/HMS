@@ -2,7 +2,7 @@ import prisma from "../../config/prisma";
 import { IUserAccountRepository } from "../../application/interfaces/IUserAccountRepository";
 import { UserAccount } from "../../domain/entities/UserAccount";
 import { Person } from "../../domain/entities/Person";
-import { EmergencyContact } from "../../domain/value-objects/EmergencyContact";
+import { AccountStatus } from "../../domain/common/enums";
 
 export class PrismaUserAccountRepository implements IUserAccountRepository {
   async create(account: UserAccount): Promise<void> {
@@ -49,7 +49,7 @@ export class PrismaUserAccountRepository implements IUserAccountRepository {
       d.id,
       d.username,
       d.passwordHash,
-      d.status,
+      d.status as AccountStatus,
       person,
       d.lastLoginAt
     );
@@ -77,10 +77,9 @@ export class PrismaUserAccountRepository implements IUserAccountRepository {
       d.id,
       d.username,
       d.passwordHash,
-      d.status,
+      d.status as AccountStatus,
       person,
       d.lastLoginAt
     );
   }
 }
-

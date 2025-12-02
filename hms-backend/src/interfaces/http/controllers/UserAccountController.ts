@@ -1,5 +1,6 @@
 import { RegisterUserUseCase } from "../../../application/use-cases/RegisterUserUseCase";
 import { LoginUserUseCase } from "../../../application/use-cases/LoginUserUseCase";
+import { Request, Response } from "express";
 
 export class UserAccountController {
   constructor(
@@ -7,7 +8,7 @@ export class UserAccountController {
     private loginUC: LoginUserUseCase
   ) {}
 
-  async register(req, res) {
+  async register(req: Request, res: Response) {
     try {
       const user = await this.registerUC.execute(req.body);
       return res.json({ success: true, user });
@@ -16,7 +17,7 @@ export class UserAccountController {
     }
   }
 
-  async login(req, res) {
+  async login(req: Request, res: Response) {
     try {
       const user = await this.loginUC.execute(
         req.body.username,
@@ -28,4 +29,3 @@ export class UserAccountController {
     }
   }
 }
-

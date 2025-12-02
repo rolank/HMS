@@ -1,7 +1,12 @@
 import { prisma } from "../../config/prisma";
-import { IAppointmentRepository } from "../../../application/interfaces/IAppointmentRepository";
+import { IAppointmentRepository } from "../../application/interfaces/IAppointmentRepository";
 import { Appointment } from "../../domain/entities/Appointment";
-import { AppointmentStatus } from "../../domain/common/enums";
+import {
+  AppointmentStatus,
+  BookingChannel,
+  BookedByRole,
+  CheckInChannel
+} from "../../domain/common/enums";
 
 export class PrismaAppointmentRepository implements IAppointmentRepository {
 
@@ -37,16 +42,16 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
           r.id,
           r.appointmentDate,
           r.reason,
-          r.channel,
+          r.channel as BookingChannel,
           r.createdById,
           r.bookedById,
-          r.bookedByRole,
+          r.bookedByRole as BookedByRole,
           r.doctorId,
           r.patientId,
-          r.status,
+          r.status as AppointmentStatus,
           r.createdAt,
           r.checkedInById,
-          r.checkInChannel,
+          r.checkInChannel as CheckInChannel | null,
           r.checkInNotes
         )
     );
@@ -79,16 +84,16 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
       r.id,
       r.appointmentDate,
       r.reason,
-      r.channel,
+      r.channel as BookingChannel,
       r.createdById,
       r.bookedById,
-      r.bookedByRole,
+      r.bookedByRole as BookedByRole,
       r.doctorId,
       r.patientId,
-      r.status,
+      r.status as AppointmentStatus,
       r.createdAt,
       r.checkedInById,
-      r.checkInChannel,
+      r.checkInChannel as CheckInChannel | null,
       r.checkInNotes
     );
   }
@@ -103,7 +108,7 @@ export class PrismaAppointmentRepository implements IAppointmentRepository {
   async checkIn(
     id: string,
     checkedInByUserAccountId: string,
-    channel: any,
+    channel: CheckInChannel,
     notes: string
   ): Promise<void> {
     await prisma.appointment.update({
