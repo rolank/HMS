@@ -82,4 +82,32 @@ export class PrismaUserAccountRepository implements IUserAccountRepository {
       d.lastLoginAt
     );
   }
+
+  async findAll(): Promise<UserAccount[]> {
+    const list = await prisma.userAccount.findMany({
+      include: { owner: true }
+    });
+
+    return list.map((d) => {
+      const person = new Person(
+        d.owner.id,
+        d.owner.firstName,
+        d.owner.lastName,
+        d.owner.dob,
+        d.owner.gender,
+        d.owner.address,
+        d.owner.phone,
+        []
+      );
+
+      return new UserAccount(
+        d.id,
+        d.username,
+        d.passwordHash,
+        d.status as AccountStatus,
+        person,
+        d.lastLoginAt
+      );
+    });
+  }
 }

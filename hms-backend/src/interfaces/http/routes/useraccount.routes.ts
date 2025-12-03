@@ -9,6 +9,8 @@ router.get("/register", (_req, res) =>
   res.json({ message: "Use POST /api/v1/useraccount/register with JSON body to create a user" })
 );
 
+router.get("/", (req, res) => controller.list(req, res));
+
 router.post("/register", (req, res) => controller.register(req, res));
 router.post("/login", (req, res) => controller.login(req, res));
 

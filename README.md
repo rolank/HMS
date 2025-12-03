@@ -1,8 +1,10 @@
 # HMS - Hospital Management System
 
-A backend system for managing hospital operations including patients, appointments, encounters, and medical records. Built with Clean Architecture principles and Domain-Driven Design.
+A full-stack hospital management system for managing patients, appointments, encounters, and medical records. Built with Clean Architecture principles and Domain-Driven Design.
 
 ## Tech Stack
+
+### Backend
 
 - **Runtime**: Node.js 20 (TypeScript)
 - **Framework**: Express.js
@@ -10,24 +12,32 @@ A backend system for managing hospital operations including patients, appointmen
 - **ORM**: Prisma
 - **Architecture**: Clean Architecture / DDD
 
+### Frontend
+
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Dev Server**: Port 5173
+
 ## Prerequisites
 
 - Docker & Docker Compose
 - Node.js 20+ (for local development)
 
-## Docker Compose
-
 ### Quick Start
 
-#### This command will:
-
 - Build images if they don't exist
-- Start all defined services (backend, frontend, database, etc.)
+- Start all defined services (MySQL database, backend API, frontend UI)
 - Run containers in the background (-d flag)
 
 ```bash
 docker compose up -d --build
 ```
+
+**Services started:**
+
+- MySQL: `localhost:3306`
+- Backend API: `http://localhost:8080`
+- Frontend UI: `http://localhost:5173` (mapped to container port 8080)
 
 #### This command will:
 
@@ -60,19 +70,38 @@ docker compose down -v
 ### View Logs
 
 ```bash
+# Backend logs
 docker compose logs -f hms-backend
+
+# Frontend logs
+docker compose logs -f hms-frontend
+
+# All services
+docker compose logs -f
 ```
 
 ## Development
 
 ### Local Development Mode
 
-Run with hot-reload inside the container:
+#### Backend (with hot-reload):
 
 ```bash
 cd hms-backend
 npm run dev
 ```
+
+#### Frontend (with hot-reload):
+
+```bash
+cd frontend
+npm run dev
+```
+
+**Notes**:
+
+- The frontend container listens on port 8080 (Cloud Run default) and is mapped to host 5173 in docker-compose.
+- The frontend expects the backend API at `http://localhost:8080/api/v1`.
 
 ### Making Database Changes
 
@@ -91,9 +120,13 @@ hms-backend/src/
 ├── application/      # Use cases & business logic orchestration
 ├── infrastructure/   # Prisma repositories & external integrations
 └── interfaces/       # HTTP controllers, routes, DTOs, middleware
-```
 
-For detailed architecture patterns and conventions, see [`.github/copilot-instructions.md`](.github/copilot-instructions.md)
+frontend/src/
+├── components/       # React components
+├── pages/           # Page-level components
+├── services/        # API integration layer
+└── types/           # TypeScript type definitions
+```
 
 ## API Endpoints
 
@@ -151,7 +184,7 @@ fetch("http://localhost:8080/api/v1/doctors", {
   .catch((err) => console.error("Error:", err));
 ```
 
-#### Create Employee 
+#### Create Employee
 
 ```javascript
 fetch("http://localhost:8080/api/v1/employees", {
@@ -190,15 +223,15 @@ fetch("http://localhost:8080/api/v1/patients", {
     gender: "Male",
     address: "123 Main St",
     phone: "555-1234",
-    patientId: "P001",
-    medicalRecordNumber: "MRN1001",
+    patientId: "P002",
+    medicalRecordNumber: "MRN1002",
     bloodType: "O+",
     insuranceProvider: "Aetna",
   }),
 })
   .then((res) => res.json())
-  .then((data) => console.log(data))
-  .catch((err) => console.error("Error:", err));
+  .then(console.log)
+  .catch(console.error);
 ```
 
 #### List Patients
@@ -317,8 +350,4 @@ When adding new features:
 4. Implement repositories in `infrastructure/prisma/`
 5. Wire together via factories in `interfaces/http/factories/`
 
-See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for detailed patterns and conventions.
-
 ## License
-
-[Your License Here]

@@ -2,6 +2,7 @@ node_modules/
 dist/
 .env
 *.log
-./hms-backend/generate
+./hms-backend/generate*
+.github/copilot-instructions.md
 
 

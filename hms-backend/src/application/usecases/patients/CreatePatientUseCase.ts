@@ -44,5 +44,6 @@ export class CreatePatientUseCase {
     );
 
     await this.repo.create(patient);
+    return patient;
   }
 }

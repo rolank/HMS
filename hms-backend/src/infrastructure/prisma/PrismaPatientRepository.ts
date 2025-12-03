@@ -13,27 +13,43 @@ export class PrismaPatientRepository implements IPatientRepository {
   }
 
   async findById(id: string): Promise<Patient | null> {
-    const data = await prisma.patient.findUnique({ where: { id } });
+    const data = await prisma.patient.findUnique({
+      where: { id },
+      include: {
+        person: {
+          include: { emergencyContacts: true }
+        }
+      }
+    });
     return data ? PrismaPatientRepository.toDomain(data) : null;
   }
 
   async findAll(): Promise<Patient[]> {
-    const list = await prisma.patient.findMany();
+    const list = await prisma.patient.findMany({
+      include: {
+        person: {
+          include: { emergencyContacts: true }
+        }
+      }
+    });
     return list.map(PrismaPatientRepository.toDomain);
   }
 
   static toDomain(d: any): Patient {
+    const person = d.person || {};
+    const contacts = (person.emergencyContacts || []).map(
+      (c: any) => new EmergencyContact(c.name, c.relation, c.phone, c.id)
+    );
+
     const base = new Person(
-      d.id,
-      d.firstName,
-      d.lastName,
-      d.dob,
-      d.gender,
-      d.address,
-      d.phone,
-      (d.emergencyContacts || []).map(
-        (c: any) => new EmergencyContact(c.name, c.relation, c.phone)
-      )
+      person.id || d.id,
+      person.firstName,
+      person.lastName,
+      person.dob,
+      person.gender,
+      person.address,
+      person.phone,
+      contacts
     );
 
     return new Patient(
