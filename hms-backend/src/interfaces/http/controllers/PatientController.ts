@@ -31,10 +31,30 @@ export class PatientController {
     try {
       const repo = new PrismaPatientRepository();
       const usecase = new CreatePatientUseCase(repo);
-      const patient = await usecase.execute(req.body);
+
+      // Map frontend field names to use case expected names
+      const command = {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        dob: req.body.dateOfBirth || req.body.dob, // Support both field names
+        gender: req.body.gender,
+        address: req.body.address,
+        phone: req.body.phoneNumber || req.body.phone, // Support both field names
+        emergencyContacts: req.body.emergencyContacts || [],
+        patientId: req.body.patientId || `P${Date.now()}`, // Auto-generate if not provided
+        medicalRecordNumber: req.body.medicalRecordNumber || `MRN${Date.now()}`, // Auto-generate if not provided
+        bloodType: req.body.bloodType,
+        insuranceProvider: req.body.insuranceInfo || req.body.insuranceProvider, // Support both field names
+      };
+
+      const patient = await usecase.execute(command);
       return res
         .status(201)
-        .json({ success: true, message: "Patient created", patient: toJson(patient) });
+        .json({
+          success: true,
+          message: "Patient created",
+          patient: toJson(patient),
+        });
     } catch (e: any) {
       return res.status(400).json({ success: false, error: e.message });
     }

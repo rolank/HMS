@@ -340,6 +340,90 @@ fetch(
 - **Factory Pattern**: Dependency injection via controller factories
 - **Table Per Hierarchy**: Person base entity with Patient/Employee specializations
 
+## Cloud SQL Connection
+
+### For Cloud Run Deployment
+
+When deploying to Google Cloud Run with Cloud SQL, update your `DATABASE_URL` environment variable to use the Unix socket format:
+
+```bash
+DATABASE_URL="mysql://USER:PASSWORD@localhost/hms_db?host=/cloudsql/PROJECT_ID:REGION:INSTANCE_NAME"
+```
+
+**Steps:**
+
+1. **Create Cloud SQL instance** in Google Cloud Console
+2. **Get connection name**: `PROJECT_ID:REGION:INSTANCE_NAME` (found in Cloud SQL instance details)
+3. **Create database user** and password
+4. **Update Cloud Run environment variables**:
+
+   ```bash
+   gcloud run deploy hms-backend \
+     --image gcr.io/PROJECT_ID/hms-backend:latest \
+     --add-cloudsql-instances PROJECT_ID:REGION:INSTANCE_NAME \
+     --set-env-vars DATABASE_URL="mysql://USER:PASSWORD@localhost/hms_db?host=/cloudsql/PROJECT_ID:REGION:INSTANCE_NAME"
+   ```
+
+5. **Run migrations** (one-time setup):
+   ```bash
+   # From Cloud Shell or local with Cloud SQL Proxy
+   docker run --rm \
+     -e DATABASE_URL="mysql://USER:PASSWORD@CLOUD_SQL_IP:3306/hms_db" \
+     gcr.io/PROJECT_ID/hms-backend:latest \
+     npx prisma migrate deploy
+   ```
+
+### Connection Options
+
+**Option 1: Unix Socket (Cloud Run - Recommended)**
+
+```
+DATABASE_URL="mysql://USER:PASSWORD@localhost/hms_db?host=/cloudsql/PROJECT_ID:REGION:INSTANCE_NAME"
+```
+
+- Automatic connection via Cloud Run's built-in Cloud SQL integration
+- No need for Cloud SQL Auth Proxy
+- Most secure and performant
+
+**Option 2: Public IP (Testing/Development)**
+
+```
+DATABASE_URL="mysql://USER:PASSWORD@CLOUD_SQL_PUBLIC_IP:3306/hms_db"
+```
+
+- Requires adding your IP to Cloud SQL authorized networks
+- Less secure, not recommended for production
+- Useful for local testing against Cloud SQL
+
+**Option 3: Cloud SQL Auth Proxy (Local Development)**
+
+```bash
+# Start proxy in a terminal
+./cloud_sql_proxy -instances=PROJECT_ID:REGION:INSTANCE_NAME=tcp:3306
+
+# Use localhost in DATABASE_URL
+DATABASE_URL="mysql://USER:PASSWORD@127.0.0.1:3306/hms_db"
+```
+
+### Troubleshooting
+
+**Error: `Can't reach database server at unix(:3306`**
+
+- Your `DATABASE_URL` format is incorrect for Cloud SQL
+- Make sure you're using the Unix socket format with `?host=/cloudsql/...`
+- Example: `mysql://root:password@localhost/hms_db?host=/cloudsql/my-project:us-central1:my-instance`
+
+**Error: `Connection refused`**
+
+- For Cloud Run: Ensure `--add-cloudsql-instances` flag is set during deployment
+- For local: Verify Cloud SQL Auth Proxy is running
+- Check that Cloud SQL instance is running and accessible
+
+**Error: `Access denied for user`**
+
+- Verify database user credentials in Cloud SQL
+- Ensure the user has proper permissions on the database
+
 ## Contributing
 
 When adding new features:

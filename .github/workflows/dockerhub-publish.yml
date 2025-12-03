@@ -46,6 +46,8 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            VITE_API_BASE=${{ secrets.VITE_API_BASE || 'https://hms-backend-591006590099.us-south1.run.app/api/v1' }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/hms-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/hms-frontend:${{ github.sha }}

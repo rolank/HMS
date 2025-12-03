@@ -1,8 +1,13 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080/api/v1";
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "http://localhost:8080/api/v1";
 
 type HttpMethod = "GET" | "POST";
 
-async function request<T>(path: string, method: HttpMethod = "GET", body?: any): Promise<T> {
+async function request<T>(
+  path: string,
+  method: HttpMethod = "GET",
+  body?: any
+): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers: {
@@ -93,7 +98,11 @@ export function fetchDoctors() {
 }
 
 export function createDoctor(payload: any) {
-  return request<{ success: boolean; doctor: Doctor }>("/doctors", "POST", payload);
+  return request<{ success: boolean; doctor: Doctor }>(
+    "/doctors",
+    "POST",
+    payload
+  );
 }
 
 export function fetchEmployees() {
@@ -101,7 +110,11 @@ export function fetchEmployees() {
 }
 
 export function createEmployee(payload: any) {
-  return request<{ success: boolean; employee: any }>("/employees", "POST", payload);
+  return request<{ success: boolean; employee: any }>(
+    "/employees",
+    "POST",
+    payload
+  );
 }
 
 export function fetchPatients() {
@@ -109,15 +122,45 @@ export function fetchPatients() {
 }
 
 export function createPatient(payload: any) {
-  return request<{ success: boolean; patient: any }>("/patients", "POST", payload);
+  return request<{ success: boolean; patient: any }>(
+    "/patients",
+    "POST",
+    payload
+  );
 }
 
 export function fetchUserAccounts() {
   return request<{ success: boolean; users: UserAccount[] }>("/useraccount");
 }
 
+export function registerUserAccount(payload: {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}) {
+  return request<{ success: boolean; message: string; user?: UserAccount }>(
+    "/useraccount/register",
+    "POST",
+    payload
+  );
+}
+
+export function loginUserAccount(payload: {
+  username: string;
+  password: string;
+}) {
+  return request<{ success: boolean; message: string }>(
+    "/useraccount/login",
+    "POST",
+    payload
+  );
+}
+
 export function fetchAppointments() {
-  return request<{ success: boolean; appointments: Appointment[] }>("/appointments");
+  return request<{ success: boolean; appointments: Appointment[] }>(
+    "/appointments"
+  );
 }
 
 export function createAppointment(payload: any) {
