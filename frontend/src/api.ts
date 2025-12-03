@@ -138,6 +138,10 @@ export function registerUserAccount(payload: {
   password: string;
   firstName: string;
   lastName: string;
+  dob: string;
+  gender: string;
+  address: string;
+  phone: string;
 }) {
   return request<{ success: boolean; message: string; user?: UserAccount }>(
     "/useraccount/register",

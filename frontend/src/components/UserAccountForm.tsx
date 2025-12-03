@@ -6,6 +6,10 @@ export default function UserAccountForm() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<string>("");
 
   const onRegister = async (e: React.FormEvent) => {
@@ -17,6 +21,10 @@ export default function UserAccountForm() {
         password,
         firstName,
         lastName,
+        dob,
+        gender,
+        address,
+        phone,
       });
       setStatus(res.message || "Registered successfully");
     } catch (err: any) {
@@ -43,22 +51,51 @@ export default function UserAccountForm() {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
         <input
           placeholder="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
         <input
           placeholder="First Name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
+          required
         />
         <input
           placeholder="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
+          required
+        />
+        <input
+          type="date"
+          placeholder="Date of Birth"
+          value={dob}
+          onChange={(e) => setDob(e.target.value)}
+          required
+        />
+        <input
+          placeholder="Gender"
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          required
+        />
+        <input
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          required
+        />
+        <input
+          placeholder="Phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          required
         />
         <div style={{ display: "flex", gap: 8 }}>
           <button type="submit">Register</button>
