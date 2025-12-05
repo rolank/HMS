@@ -4,7 +4,7 @@ import { PrismaPatientRepository } from "../../../infrastructure/prisma/PrismaPa
 import { Patient } from "../../../domain/entities/Patient";
 
 const toJson = (p: Patient) => ({
-  id: p.getId(),
+  id: (p as any).patientRecordId || p.getId(), // Use Patient record ID if available
   patientId: p.getPatientId(),
   medicalRecordNumber: p.getMedicalRecordNumber(),
   bloodType: p.getBloodType(),
@@ -48,13 +48,11 @@ export class PatientController {
       };
 
       const patient = await usecase.execute(command);
-      return res
-        .status(201)
-        .json({
-          success: true,
-          message: "Patient created",
-          patient: toJson(patient),
-        });
+      return res.status(201).json({
+        success: true,
+        message: "Patient created",
+        patient: toJson(patient),
+      });
     } catch (e: any) {
       return res.status(400).json({ success: false, error: e.message });
     }

@@ -8,7 +8,7 @@ import { Person } from "../../domain/entities/Person";
 export class PrismaPatientRepository implements IPatientRepository {
   async create(p: Patient): Promise<void> {
     await prisma.patient.create({
-      data: PatientMapper.toPrisma(p)
+      data: PatientMapper.toPrisma(p),
     });
   }
 
@@ -17,9 +17,9 @@ export class PrismaPatientRepository implements IPatientRepository {
       where: { id },
       include: {
         person: {
-          include: { emergencyContacts: true }
-        }
-      }
+          include: { emergencyContacts: true },
+        },
+      },
     });
     return data ? PrismaPatientRepository.toDomain(data) : null;
   }
@@ -28,14 +28,14 @@ export class PrismaPatientRepository implements IPatientRepository {
     const list = await prisma.patient.findMany({
       include: {
         person: {
-          include: { emergencyContacts: true }
-        }
-      }
+          include: { emergencyContacts: true },
+        },
+      },
     });
-    return list.map(PrismaPatientRepository.toDomain);
+    return list.map((d) => PrismaPatientRepository.toDomain(d, d.id));
   }
 
-  static toDomain(d: any): Patient {
+  static toDomain(d: any, patientRecordId?: string): Patient {
     const person = d.person || {};
     const contacts = (person.emergencyContacts || []).map(
       (c: any) => new EmergencyContact(c.name, c.relation, c.phone, c.id)
@@ -52,12 +52,17 @@ export class PrismaPatientRepository implements IPatientRepository {
       contacts
     );
 
-    return new Patient(
+    const patient = new Patient(
       base,
       d.patientId,
       d.medicalRecordNumber,
       d.bloodType,
       d.insuranceProvider
     );
+
+    // Store the Patient record ID for API responses
+    (patient as any).patientRecordId = patientRecordId || d.id;
+
+    return patient;
   }
 }
